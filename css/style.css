@@ -1,0 +1,87 @@
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+body {
+  background-color: orangered;
+  box-sizing: border-box;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: stretch;
+}
+
+.console {
+  background-color: white;
+  flex: 0 0 200px;
+}
+
+.board {
+  background-color: white;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.cell {
+  position: relative;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.cell--black {
+  background-color: #424242;
+}
+.cell--white {
+  background-color: silver;
+}
+.cell--14::after {
+  content: "15";
+  color: orange;
+}
+.cell--25::after {
+  content: "checkpoint";
+  color: blue;
+}
+.cell--26::after {
+  content: "water";
+  color: red;
+}
+.cell--27::after {
+  content: "-3";
+  color: green;
+}
+.cell--28::after {
+  content: "-2";
+  color: green;
+}
+.cell--29::after {
+  content: "-1";
+  color: green;
+}
+
+.pawn {
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  height: 40%;
+  z-index: 500;
+}
+.pawn--black {
+  background-color: black;
+}
+.pawn--white {
+  background-color: white;
+}
