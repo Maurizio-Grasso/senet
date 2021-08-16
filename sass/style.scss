@@ -88,4 +88,20 @@ body {
     &--white {
         background-color: white;
     }
+
+    &--moveable {
+        animation-name: pulsePawn;
+        animation-duration: .35s;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in;
+    }
+}
+
+@keyframes pulsePawn {
+    from {
+        transform: translate(-50% , -50%) scale(.95);
+    }
+    to {
+        transform: translate(-50% , -50%) scale(1.05);
+    }
 }

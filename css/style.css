@@ -85,3 +85,31 @@ body {
 .pawn--white {
   background-color: white;
 }
+.pawn--moveable {
+  -webkit-animation-name: pulsePawn;
+          animation-name: pulsePawn;
+  -webkit-animation-duration: 0.35s;
+          animation-duration: 0.35s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+  -webkit-animation-timing-function: ease-in;
+          animation-timing-function: ease-in;
+}
+
+@-webkit-keyframes pulsePawn {
+  from {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+@keyframes pulsePawn {
+  from {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}

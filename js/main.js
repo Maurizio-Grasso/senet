@@ -8,6 +8,8 @@ const elBoardBox = document.querySelector('.board');
 let cells;              // Array che conterrà tutte le celle
 let pawns = [];         // Array che conterrà tutte le pedine
 
+let currentPlayer = 'white';
+
 let currentScore = 1;   
 
 init();
@@ -25,8 +27,7 @@ function init(){
 
     cells = createCells();    
     resizeCells(cells);
-
-    createPawns(3);
+    createPawns(7);
 
 } 
 
@@ -56,21 +57,17 @@ function createCells() {
     
     //  Crea oggetto rappresentate una cella e lo inserisce nel relativo array    
     sortedCells.forEach( (cell , i) => { 
+
         cellObj.push({
             index : i , 
             el : cell , 
             pawn : null ,
-            prev() {
-                return cells[this.index - 1 ] ?? null;
-            } ,
-            next() {
-                return cells[this.index + 1 ] ?? null;
-            } ,            
-            empty() {
-                this.pawn = null;
-            }
 
-        })
+            prev()  { return cells[this.index - 1 ] ?? null; } ,
+            next()  { return cells[this.index + 1 ] ?? null; } ,            
+            empty() { this.pawn = null; } ,
+
+        });
     });
     
     return(cellObj);
@@ -103,18 +100,20 @@ function createPawns(pawnsN = 7) {
             cell        : null ,
             isMoveable  : false ,
 
-            setMoveability({moveable = false, cell = null, message = ''}) {
+            setMoveability( {moveable = false, cell = null, message = ''}) {
+
+                this.isMoveable = moveable;
 
                 if(moveable) {
-                    this.isMoveable = true;
                     const thisPawn = this;
                     this.el.classList.add('pawn--moveable');
-                    this.el.onclick = function() { movePawn(thisPawn , cell) };                    
-                } else {
-                    this.isMoveable = false;
-                    this.el.classList.remove('pawn--moveable');
-                    this.el.onclick = function() { showMessage(message) };
+                    this.el.onclick = function() { movePawn(thisPawn , cell) };
+                    return;
                 }
+
+                this.el.classList.remove('pawn--moveable');
+                this.el.onclick = function() { showMessage(message) };
+                
             } ,
         }
 
@@ -131,86 +130,147 @@ function createPawns(pawnsN = 7) {
 
 function checkIfMoveable(pawn , cell){
 
-    if(!cell) { pawn.setMoveability({message : `Stai andando troppo avanti: non ci sono più celle!`}); return}; // Soluzione momentanea
+    if(!cell) { pawn.setMoveability( {message : `Stai andando troppo avanti: non ci sono più celle!`}); return}; // Soluzione momentanea
+
+    //  È il turno dell'avversario
+    if(pawn.color !== currentPlayer){
+        pawn.setMoveability( {message : `Non puoi muovere questa pedina: è il turno di ${currentPlayer}.`});
+        return;
+    }
 
     //  La cella è successiva alla 25 la pedina non è attualmente sulla cella 25
     if(cell.index > 25 && pawn.cell.index !== 25){
-        pawn.setMoveability({message : `Non puoi superare la casella 26 senza prima stazionarci.`})
+        pawn.setMoveability( {message : `Non puoi superare la casella 26 senza prima stazionarci.`})
         return;
     }
     
     //  La cella è già occupata da una pedina dello stesso colore. Non si procede    
     if(cell.pawn?.color === pawn.color){
-        pawn.setMoveability({message : `Non puoi spostare pedina in una casella già occupata da una pedina dello stesso colore.`});
+        pawn.setMoveability( {message : `Non puoi spostare pedina in una casella già occupata da una pedina dello stesso colore.`});
         return;
     }
 
-    //  La cella è occupata da una pedina di colore diverso.
+    //  La cella è occupata da una pedina avversaria
     if(cell.pawn?.color) {
 
-        //  Sulla cella di destinazione e su almeno una di quelle adiacenti è presente una pedina avversaria. Le pedine sono quindi inattaccabili.
+        //  Due (o più) pedine avversarie formano un muro che le rende inattaccabili
         if(cell.prev()?.pawn?.color === cell.pawn.color || cell.next()?.pawn?.color === cell.pawn.color){            
-            pawn.setMoveability({message : `Due o più pedine nella casella di destinazione formano un muro che le rende inattaccabili.`});
+            pawn.setMoveability( {message : `Due o più pedine nella casella di destinazione formano un muro che le rende inattaccabili.`});
             return;
         }
     }
 
     // Nessuna Eccezione (Casella Vuota)
 
-    pawn.setMoveability({moveable : true , cell : cell });
+    pawn.setMoveability( {moveable : true , cell : cell });
 
 }
+
+//  Sposta la pedina
 
 function movePawn(pawn , cell){
 
+    const pownMovements = [{pawn : pawn , cell : cell}];
+
     console.log(`Devo Spostare la pedina ${pawn.index} dalla casella ${pawn.cell?.index} alla casella ${cell.index}`);
+        
+    //  Se sulla cella di destinazione è presente una pedina avversaria binsoga scambiarle
+    if(cell.pawn)   pownMovements.push({pawn : cell.pawn , cell : pawn.cell}) ;
 
-    //  !!! SE SIAMO ARRIVATI QUI LE VERIFICHE Son GIà STATE FATTE. NON BISOGNA FARE ALTRI CONTROLLI !!!
+    pownMovements.forEach(mov => {  animatePawn(mov.pawn , mov.cell); }); // animazione pedine
 
-    if(cell.pawn){
-        console.log(`La casella è occupara da una pedina di colore diverso, per cui le scambio`);
-        swapPawns(pawn , cell.pawn);
-        return;
-    }    
-
-    removePawn(pawn);
-    addPawn(pawn , cell);
+    setTimeout(() => {
+        pownMovements.forEach(mov => {  mov.pawn.el.style = ''; });
+        pownMovements.forEach(mov => {  removePawn(mov.pawn); });
+        pownMovements.forEach(mov => {  addPawn(mov.pawn , mov.cell); });
+    }, 1000);
 
 }
+
+//  Rimuove Pedina
 
 function removePawn(pawn){    
+
     pawn.cell.empty();
-    pawn.el.remove();
+    pawn.el.remove();        
+               
 }
 
+//  Aggiunge Pedina
 
 function addPawn(pawn , cell){
+    
     pawn.cell = cell;
     cell.pawn = pawn;
     cell.el.appendChild(pawn.el);
 
-    pawns.forEach( pawn => pawn.el.onclick = null );
+    pawns.forEach( pawn => {    // Questo foreach deve trovare una migliore collocazione
+        pawn.setMoveability( {moveable : false});
+    } );
 
 }
 
 
-function swapPawns(pawn1 , pawn2){
+//  Gestisce l'animazione della pedina durante lo spostamento
 
-    let cell1 = pawn2.cell;
-    let cell2 = pawn1.cell;
+function animatePawn(pawn , cell) {
+    
+    let backward = false;
+        
+    let currentCell = pawn.cell.index;  // indice cella di partenza
+    let targetCell =  cell.index;       // indice cella di arrivo
+    
+    // Se la pedina si deve spostare all'indietro
+    if(currentCell > targetCell) {
+        backward = true;
+        // Scambio cella di partenza e cella di arrivo (effettuerò i calcoli come se la pedina si spostasse normalmente in avanti ed alla fine invertirò il risultato)
+        [currentCell , targetCell] = [targetCell , currentCell];    
+    }
 
-    removePawn(pawn1);
-    removePawn(pawn2);
+    let currentRow = Math.trunc(currentCell / 10);  //  Riga di partenza
+    let targetRow  = Math.trunc(targetCell / 10);   //  Riga di arrivo
 
-    addPawn(pawn1 , cell1);
-    addPawn(pawn2 , cell2);
+    let yOffsetCells = targetRow - currentRow;    // celle di differenza in verticale
+
+    let cellsToRowEnd = (9 + (10 * currentRow) - currentCell );                         // celle mancanti da quella di partenza alla fine del row
+    let cellsOnNewRow = (targetCell - currentCell) - cellsToRowEnd - yOffsetCells;      // numero di celle da coprire sul row successivo (si sottrae yOffsetCells perché l'eventuale cambio di raw corrisponde di per sé ad un passo)
+
+
+    let xOffsetCells = targetRow === currentRow ? targetCell - currentCell : cellsOnNewRow -  cellsToRowEnd;    // numero di celle di differenza sull'asse x
+
+    if(backward) {
+        //  Se la pedina si stava muovendo all'indietro, inverto il risultato
+        xOffsetCells*= -1;
+        yOffsetCells*= -1;
+    }
+
+    let xOffsetPerc = xOffsetCells * 100 + (targetRow === 1 ? - 50 : 50);   // calcola la percentuale di spostamento dell'elemento, ossia il valore della proprietà left: nello style inline. Si aggiunge (o si sottrae se nel raw centrale) il 50% perchè era il valore di partenza)
+    let yOffsetPerc = yOffsetCells * 100 + 50;  // percentuale di spostamento in verticare da assegnare a top: nello style inline
+
+    if(targetRow === 1) xOffsetPerc*= -1;   // se il row di destinazione è quello centrale, sul quale ci si muove al contrario, imverto il valore
+
+
+    console.log(`la pedina deve spostarsi di ${xOffsetCells} caselle (del ${xOffsetPerc}%) in orizzontale e di ${yOffsetCells} caselle (del ${yOffsetPerc}%)  in verticale`);
+
+    pawn.el.style = `transition: all 1s; left: ${xOffsetPerc}%; top: ${yOffsetPerc}%`;  // assegnazione finale dello style
 
 }
 
+
+
+//  Nuovo turno
 
 function newRound(){
 
-    currentScore = getRandom(8 , 10);
+    //  Se è uscito un 2 o un 3 si cambia giocatore 
+    if(currentScore === 2 || currentScore === 3){
+        // questo if si trova qui momentaneamente
+        currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+    }
+
+    console.log(`È il turno di ${currentPlayer}`);
+
+    currentScore = getRandom(1 , 5);
 
     console.log(`Tiro da ${currentScore} caselle`);
     showMessage(`Tiro da ${currentScore} caselle`);
@@ -231,10 +291,12 @@ function resizeCells(cells){
     cells.forEach( cell => cell.el.style = `width: ${cellSize}px; height: ${cellSize}px;`);    
 }
 
+//  Stampa messaggi di gioco
+
 function showMessage(error) {
 
     elConsoleBox.textContent = error;
-    
+
     setTimeout( function(){
         elConsoleBox.textContent = '';
     } , 4000)
