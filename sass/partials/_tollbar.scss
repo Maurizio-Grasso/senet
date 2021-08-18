@@ -1,0 +1,16 @@
+.console ,
+.controls {
+    background-color: rgba($white , .2);
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.console {
+    flex-basis: 60%;
+    
+}
+
+.controls {
+    flex-basis: 30%;
+
+}

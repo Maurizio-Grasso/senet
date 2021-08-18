@@ -1,3 +1,8 @@
+@import url(http://fonts.cdnfonts.com/css/papyrus);
+:root {
+  font-size: 62.5%;
+}
+
 *,
 *::after,
 *::before {
@@ -7,27 +12,78 @@
 }
 
 body {
-  background-color: orangered;
   box-sizing: border-box;
+  font-size: 2.2rem;
+  font-family: "Papyrus", sans-serif;
+  color: #b88414;
+  letter-spacing: 3px;
+  background-image: linear-gradient(to bottom right, #111111, #051024);
 }
 
-#app {
+body {
   width: 100%;
-  height: 100vh;
-  padding: 50px;
+  height: 100%;
+}
+
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+  html {
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+}
+@media screen and (orientation: landscape) {
+  body {
+    height: 100vh;
+    width: 100vw;
+  }
+}
+.grid__container {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  align-content: stretch;
   align-items: stretch;
+  padding: 2rem;
+}
+.grid__row--toolbar {
+  flex: 1 1 auto;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+}
+.grid__row--board {
+  flex: 0 0 auto;
+}
+
+.console,
+.controls {
+  background-color: rgba(240, 240, 240, 0.2);
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .console {
-  background-color: white;
-  flex: 0 0 200px;
+  flex-basis: 60%;
+}
+
+.controls {
+  flex-basis: 30%;
 }
 
 .board {
-  background-color: white;
+  background-image: url("../img/board-bg-1.jpg");
+  background-size: 100%;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
@@ -35,49 +91,67 @@ body {
 
 .cell {
   position: relative;
-  flex-grow: 0;
-  flex-shrink: 0;
+  flex: 0 0 10%;
+  outline: 1px inset rgba(17, 17, 17, 0.5);
+}
+.cell::before {
+  content: "";
+  padding-top: 100%;
+  float: left;
 }
 .cell--black {
-  background-color: #424242;
+  background-color: rgba(66, 66, 66, 0.2);
 }
 .cell--white {
-  background-color: silver;
+  background-color: rgba(192, 192, 192, 0.2);
 }
 .cell--14::after {
   content: "15";
   color: orange;
+  position: absolute;
+  left: 0;
 }
 .cell--25::after {
   content: "checkpoint";
   color: blue;
+  position: absolute;
+  left: 0;
 }
 .cell--26::after {
   content: "water";
   color: red;
+  position: absolute;
+  left: 0;
 }
 .cell--27::after {
   content: "-3";
   color: green;
+  position: absolute;
+  left: 0;
 }
 .cell--28::after {
   content: "-2";
   color: green;
+  position: absolute;
+  left: 0;
 }
 .cell--29::after {
   content: "-1";
   color: green;
+  position: absolute;
+  left: 0;
 }
 
 .pawn {
-  border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  z-index: 10;
+  transform: translate(-50%, -50%) scale(1);
   width: 40%;
   height: 40%;
-  z-index: 500;
+  box-shadow: 3px 3px 3px rgba(17, 17, 17, 0.25);
+  border-radius: 50%;
   opacity: 1;
 }
 .pawn--black {
@@ -89,8 +163,8 @@ body {
 .pawn--moveable {
   -webkit-animation-name: pulsePawn;
           animation-name: pulsePawn;
-  -webkit-animation-duration: 0.35s;
-          animation-duration: 0.35s;
+  -webkit-animation-duration: 1s;
+          animation-duration: 1s;
   -webkit-animation-iteration-count: infinite;
           animation-iteration-count: infinite;
   -webkit-animation-timing-function: ease-in;
@@ -98,19 +172,25 @@ body {
 }
 
 @-webkit-keyframes pulsePawn {
-  from {
+  0% {
     transform: translate(-50%, -50%) scale(0.95);
   }
-  to {
-    transform: translate(-50%, -50%) scale(1.05);
+  50% {
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.95);
   }
 }
 
 @keyframes pulsePawn {
-  from {
+  0% {
     transform: translate(-50%, -50%) scale(0.95);
   }
-  to {
-    transform: translate(-50%, -50%) scale(1.05);
+  50% {
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.95);
   }
 }

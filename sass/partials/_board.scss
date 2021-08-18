@@ -1,0 +1,40 @@
+
+.board {
+    background-image: url('../img/board-bg-1.jpg');
+    background-size: 100%;
+
+    display: flex;
+    flex-wrap: wrap;    
+    flex-direction: row;
+}
+
+.cell {
+    
+    position: relative;
+    
+    flex: 0 0 10%;
+
+    outline: 1px inset rgba($color: $black, $alpha: .5);    // simula bordo
+
+    &::before {     // fissa porzioni cella su 1:1
+        content: '';
+        padding-top: 100%;
+        float: left;
+    }
+    
+
+    &--black {
+        background-color: rgba(66, 66, 66 , .2);
+    }
+
+    &--white {
+        background-color: rgba(192, 192, 192 , .2);
+    }
+
+    &--14::after{ content: '15'; color: orange; position: absolute; left: 0;}
+    &--25::after{ content: 'checkpoint'; color: blue; position: absolute; left: 0;}
+    &--26::after{ content: 'water'; color: red; position: absolute; left: 0;}
+    &--27::after{ content: '-3'; color: green; position: absolute; left: 0;}
+    &--28::after{ content: '-2'; color: green; position: absolute; left: 0;}
+    &--29::after{ content: '-1'; color: green; position: absolute; left: 0;}
+}

@@ -1,0 +1,22 @@
+:root {
+    font-size: 62.5%;
+}
+
+* ,
+*::after ,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+body {
+    box-sizing: border-box;
+    
+    font-size: $font-size-default;
+    font-family: $font-family-primary;
+    color: $color-text;
+    letter-spacing: 3px;
+
+    background-image: linear-gradient(to bottom right, $black , $color-primary);
+}

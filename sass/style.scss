@@ -1,109 +1,13 @@
-* , 
-*::after ,
-*::before {
+@import url('http://fonts.cdnfonts.com/css/papyrus');
 
-    margin: 0;
-    padding: 0;
-    box-sizing: inherit;
-
-}
-
-body {
-    background-color: orangered;
-    box-sizing: border-box;
-}
-
-#app {
-    width: 100%;
-    height: 100vh;
-
-    padding: 50px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-
-    align-items: stretch;
-}
-
-.console {
-    background-color: white;
-    flex: 0 0 200px;
-}
-
-.board {
-    background-color: white;
-    // flex: 0 0 500px;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
+@import 'partials/variables';
+@import 'partials/base';
+@import 'partials/layout';
+@import 'partials/tollbar';
+@import 'partials/board';
+@import 'partials/pawn';
 
 
-}
-
-.cell {
-
-    position: relative;
-
-    &--black {
-        background-color: rgb(66, 66, 66);
-    }
-
-    &--white {
-        background-color: rgb(192, 192, 192);
-    }
-
-    flex-grow: 0;
-    flex-shrink: 0;
-
-    
-
-    &--14::after{ content: '15'; color: orange;}
-    &--25::after{ content: 'checkpoint'; color: blue;}
-    &--26::after{ content: 'water'; color: red;}
-    &--27::after{ content: '-3'; color: green;}
-    &--28::after{ content: '-2'; color: green;}
-    &--29::after{ content: '-1'; color: green;}
-}
-
-.pawn {
-    
-    border-radius: 50%;
-    position: absolute;
-
-    top: 50%;
-    left: 50%;
-
-    transform: translate(-50% , -50%);
-
-    width: 40%;
-    height: 40%;
-    z-index: 500;
-
-    opacity: 1;
 
 
-    &--black {
-        background-color: black;
-    }
 
-    &--white {
-        background-color: white;
-    }
-
-    &--moveable {
-        animation-name: pulsePawn;
-        animation-duration: .35s;
-        animation-iteration-count: infinite;
-        animation-timing-function: ease-in;
-    }
-}
-
-@keyframes pulsePawn {
-    from {
-        transform: translate(-50% , -50%) scale(.95);
-    }
-    to {
-        transform: translate(-50% , -50%) scale(1.05);
-    }
-}

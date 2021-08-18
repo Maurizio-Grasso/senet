@@ -367,11 +367,11 @@ function resizeCells(cells){
     
     const cellSize = elBoardBox.offsetWidth / 10;
 
-    cells.forEach( cell => { 
+    // cells.forEach( cell => { 
         
-        if(cell.el) //  Se ad una cella è assegnato un elemento nel DOM (i.e. no cella 30)...
-            cell.el.style = `width: ${cellSize}px; height: ${cellSize}px;`;
-    });
+    //     if(cell.el) //  Se ad una cella è assegnato un elemento nel DOM (i.e. no cella 30)...
+    //         cell.el.style = `width: ${cellSize}px; height: ${cellSize}px;`;
+    // });
 }
 
 //  Stampa messaggi di gioco
@@ -396,7 +396,7 @@ function showMessage(error) {
 // Al ridimensionarsi della finestra ricalcola dimensioni delle celle
 
 window.addEventListener('resize' , function(){
-    resizeCells(cells);
+    // resizeCells(cells);
 });
 
 elConsoleBox.addEventListener('click' , newRound);

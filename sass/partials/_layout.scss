@@ -1,0 +1,67 @@
+//  Regole assegnate al body e media query che
+//  forzano visualizzazione in landscape su mobile
+
+body {
+    width: 100%;
+    height: 100%;
+}
+
+@media screen  and (max-width: 1024px) and (orientation: portrait) {
+
+    html {
+      transform: rotate(-90deg);
+      transform-origin: left top;
+      width: 100vh;
+      height: 100vw;
+      overflow-x: hidden;
+      position: absolute;
+      top: 100%;
+      left: 0;
+    }
+
+  }
+
+@media screen and (orientation: landscape) {
+    body {
+        height: 100vh;
+        width: 100vw;
+    }
+}
+
+
+//  Griglia di base del layout
+
+.grid {
+
+    &__container {
+
+        width: 100%;
+        height: 100%;
+    
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        align-content: stretch;
+        align-items: stretch;
+
+        padding: $spacing-standard;    
+    }
+
+    &__row {
+
+        &--toolbar {
+            flex: 1 1 auto;
+            margin-bottom: $spacing-standard;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: stretch;
+        }
+
+        &--board {
+            flex: 0 0 auto;
+        }
+    }
+}
