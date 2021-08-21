@@ -62,6 +62,12 @@ body {
 
         &--board {
             flex: 0 0 auto;
+            padding: $spacing-big;
+
+            background-image: url('../img/wood-8bit.png');
+            background-size: 100% 100%;
+            background-position: center center;
+
         }
     }
 }

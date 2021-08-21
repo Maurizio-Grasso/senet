@@ -7,10 +7,120 @@
 
 .console {
     flex-basis: 60%;
+    padding: $spacing-big;
     
 }
 
 .controls {
     flex-basis: 30%;
+    padding: $spacing-big;
 
+}
+
+.stick {
+
+    &__container {
+
+        height: 100%;
+        width: 100%;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-evenly;
+
+        overflow: hidden;
+
+        border: 5px ridge gold;
+
+        border-radius: 20%;
+
+        padding: $spacing-standard;
+        
+    }
+    
+    &__single {
+        height: 100%;
+        flex: 0 0 calc(100% / 6);
+        
+        position: relative;
+        
+        perspective: 50rem;
+        -moz-perspective: 50rem;
+        
+        
+        
+        &__side {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 10%;
+            
+
+            backface-visibility: hidden;
+
+            background-size: auto 100%;
+            background-position: center;
+
+
+            &--black {
+                background-image: url('../img/stick-black-side.jpg');
+                transform: rotateY(-180deg);
+            }
+
+            &--white {
+                background-image: url('../img/stick-white-side.jpg');
+                transform: rotateY(0);        
+            }
+
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+
+            width: 4px;
+
+            background-color: gold;
+            display: block;
+
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50% , -50%);
+            height: 150%;
+
+            z-index: -5;
+
+        }
+
+    }
+}
+
+
+@keyframes flip-sticks-black {
+    0% {
+        transform: rotateY(-180deg);
+    } 
+    50% {
+        // transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(180deg);
+
+    }
+}
+
+@keyframes flip-sticks-white {
+    0% {
+        transform: rotateY(0deg);
+    } 
+    50% {
+        // transform: rotateY(180deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
 }

@@ -1,11 +1,23 @@
 
 .board {
-    background-image: url('../img/board-bg-1.jpg');
-    background-size: 100%;
+    background-image: 
+        url('../img/board-shadow.png'),
+        // linear-gradient(rgba($black , .3) ,rgba($black , .3)),
+        url('../img/board-bg-1.jpg');
+
+    background-size: 100% 100% , 100% 100%;
+
+    outline: 2px inset rgba($black, .5);    // simula bordo
+
 
     display: flex;
     flex-wrap: wrap;    
     flex-direction: row;
+
+    margin: auto;
+
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .cell {
@@ -14,21 +26,26 @@
     
     flex: 0 0 10%;
 
-    outline: 1px inset rgba($color: $black, $alpha: .5);    // simula bordo
+    outline: 1px inset rgba($black, .5);    // simula bordo
+
+    // background-image: url('../img/cell-wood.png');
+    background-size: 100% 100%;
+
+
 
     &::before {     // fissa porzioni cella su 1:1
         content: '';
         padding-top: 100%;
         float: left;
     }
-    
+
 
     &--black {
-        background-color: rgba(66, 66, 66 , .2);
+        background-color: rgba($black , .2);
     }
 
     &--white {
-        background-color: rgba(192, 192, 192 , .2);
+        // background-color: rgba(192, 192, 192 , .2);
     }
 
     &--14::after{ content: '15'; color: orange; position: absolute; left: 0;}

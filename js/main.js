@@ -2,8 +2,9 @@
 
 //  Elements
 
-const elConsoleBox = document.querySelector('.console');
-const elBoardBox = document.querySelector('.board');
+const elSticks      = document.querySelector('.stick__container'); 
+const elConsoleBox  = document.querySelector('.console');
+const elBoardBox    = document.querySelector('.board');
 
 let cells;              // Array che conterrà tutte le celle
 let pawns = [];         // Array che conterrà tutte le pedine
@@ -21,12 +22,12 @@ init();
 //
 */
 
+
 //  Inizializza il gioco
 
 function init(){
 
-    cells = createCells();    
-    resizeCells(cells);
+    cells = createCells();        
     createPawns(3);
 
 } 
@@ -127,6 +128,13 @@ function createPawns(pawnsN = 7) {
 
 }
 
+/*
+//
+//  Funzioni allo spostamento
+//  delle pedine
+//
+*/
+
 
 //  Controlla se una pedina può essere spostata in base alla sua posizione ed al lancio
 
@@ -176,6 +184,7 @@ function checkIfMoveable(pawn , cell){
     pawn.setMoveability( {moveable : true , cell : cell });
 
 }
+
 
 //  Sposta la pedina
 
@@ -268,14 +277,7 @@ function pawnRebirth(pawn) {
 }
 
 
-//  Operazioni da compiere alla conclusione del gioco (quando un giocatore fa uscire tutte le sue pedine dalla scacchiera)
-
-function gameOver(winner){
-    alert(`Gioco finito. Vince ${winner}`);
-}
-
-
-//  Gestisce l'animazione della pedina durante lo spostamento
+//  Animazione della pedina durante lo spostamento
 
 function animatePawn(pawn , cell) {
     
@@ -334,6 +336,71 @@ function animatePawn(pawn , cell) {
     
 }
 
+/*
+***
+***     Funzioni relative
+***     al ciclo di gioco
+***
+*/
+
+flipSticks();
+
+
+//  Muove i 4 bastoncini per generare (casualmente) un punteggio
+
+function flipSticks() {
+
+    /*
+    riorganizza tutto come dio comanda (ovvero in funzioni...)
+    */
+    let points = [];
+
+    for (let i = 0; i < 4; i++){
+        
+        const elBlack = document.querySelector(`.stick__single--${i} > .stick__single__side--black`);
+        const elWhite = document.querySelector(`.stick__single--${i} > .stick__single__side--white`);
+
+        function newFlip(){
+
+            elBlack.style.animation = `none`;
+            elWhite.style.animation = `none`;
+
+            n--;
+
+            setTimeout(() => {  // 1000 + 10
+
+                elBlack.style.animation = `flip-sticks-black 1s forwards 1 linear`;
+                elWhite.style.animation = `flip-sticks-white 1s forwards 1 linear`;
+
+                setTimeout(() => {
+
+                    if(n)   newFlip();
+                    else    getSticksPoints(n % 2);
+
+                },1000 + 10);
+
+            },10);
+
+        }
+
+        let n = getRandom(1,4);
+
+        newFlip();
+
+    }
+
+    function getSticksPoints(point){
+        
+        points.push(point);
+
+        if(points.length ===  4){
+            console.log(`hai totalizzato ${points.reduce( (acc , point) => acc + point  , 0)} punti`);
+        }
+    }    
+
+    newRound();
+}
+ 
 
 //  Nuovo turno
 
@@ -361,25 +428,21 @@ function newRound(){
 }
 
 
-//  Dimensiona le celle
 
-function resizeCells(cells){
-    
-    const cellSize = elBoardBox.offsetWidth / 10;
 
-    // cells.forEach( cell => { 
-        
-    //     if(cell.el) //  Se ad una cella è assegnato un elemento nel DOM (i.e. no cella 30)...
-    //         cell.el.style = `width: ${cellSize}px; height: ${cellSize}px;`;
-    // });
+//  Operazioni da compiere alla conclusione del gioco (quando un giocatore fa uscire tutte le sue pedine dalla scacchiera)
+
+function gameOver(winner){
+    alert(`Gioco finito. Vince ${winner}`);
 }
+
 
 //  Stampa messaggi di gioco
 
 function showMessage(error) {
-
+    
     elConsoleBox.textContent = error;
-
+    
     setTimeout( function(){
         elConsoleBox.textContent = '';
     } , 4000)
@@ -395,10 +458,8 @@ function showMessage(error) {
 
 // Al ridimensionarsi della finestra ricalcola dimensioni delle celle
 
-window.addEventListener('resize' , function(){
-    // resizeCells(cells);
-});
 
+elSticks.addEventListener('click' , flipSticks);
 elConsoleBox.addEventListener('click' , newRound);
 
 /*

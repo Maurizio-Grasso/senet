@@ -7,21 +7,37 @@
     
     transform: translate(-50% , -50%) scale(1);
     
-    width: 40%;
-    height: 40%;
     
     
     box-shadow: 3px 3px 3px rgba($black , .25);
-    border-radius: 50%;
     
     opacity: 1;
-
+    
     &--black {
-        background-color: black;
+
+        width: 40%;
+        height: 40%;
+
+        background-image: 
+        url('../img/shadow.png') ,
+        url('../img/pawn-dark-bg.jpg') ;
+
+        background-size: 100%;
+        border-radius: 10%;
     }
 
     &--white {
-        background-color: white;
+
+        width: 50%;
+        height: 50%;
+
+        background-image: 
+        radial-gradient(    rgba($black , 0) 50%, rgba($black , .4) , rgba($black , .50) 80%),
+        url('../img/pawn-light-bg.jpg') ;
+
+        background-size: 100%;
+        border-radius: 50%;
+
     }
 
     &--moveable {
