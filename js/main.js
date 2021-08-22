@@ -3,15 +3,14 @@
 //  Elements
 
 const elSticks      = document.querySelector('.stick__container'); 
-const elConsoleBox  = document.querySelector('.console');
+const elConsoleBox  = document.querySelector('.console__inner');
 const elBoardBox    = document.querySelector('.board');
 
 let cells;              // Array che conterrà tutte le celle
 let pawns = [];         // Array che conterrà tutte le pedine
 
 let currentPlayer = 'white';
-
-let currentScore = 1;   
+let currentScore;
 
 init();
 
@@ -28,8 +27,8 @@ init();
 function init(){
 
     cells = createCells();        
-    createPawns(3);
-
+    createPawns(7);
+    newRound();
 } 
 
 
@@ -87,14 +86,11 @@ function createPawns(pawnsN = 7) {
         newSinglePawn('black' , i * 2 + 1);
     };
 
-    //  Crea singola pedina
-
+    //  Creazione singola pedina
     function newSinglePawn(color , index){
 
         const el = document.createElement('div');
         el.classList.add(`pawn` , `pawn--${color}` , `pawn--${index}`);
-        el.style.color='red';   //debug
-        el.innerHTML=index;     // debug
 
         let newPawn = {
             index       : index ,
@@ -103,7 +99,7 @@ function createPawns(pawnsN = 7) {
             cell        : null ,
             isMoveable  : false ,
 
-            setMoveability( {moveable = false, cell = null, message = ''}) {
+            setMoveability( {moveable = false, cell = null, message = 'Non puoi muovere questa pedina adesso'}) {
 
                 this.isMoveable = moveable;
 
@@ -123,9 +119,7 @@ function createPawns(pawnsN = 7) {
         pawns.push(newPawn);    // Aggiunge all'array
 
         addPawn(newPawn , cells[index]);
-
     }
-
 }
 
 /*
@@ -172,8 +166,8 @@ function checkIfMoveable(pawn , cell){
     //  La cella è occupata da una pedina avversaria
     if(cell.pawn?.color) {
 
-        //  Due (o più) pedine avversarie formano un muro che le rende inattaccabili
-        if(cell.prev()?.pawn?.color === cell.pawn.color || cell.next()?.pawn?.color === cell.pawn.color){            
+        //  Due (o più) pedine avversarie formano un muro che le rende inattaccabili (regola valida solo prima della casella 25)
+        if(cell.index <= 25 && (cell.prev()?.pawn?.color === cell.pawn.color || cell.next()?.pawn?.color === cell.pawn.color)){            
             pawn.setMoveability( {message : `Due o più pedine nella casella di destinazione formano un muro che le rende inattaccabili.`});
             return;
         }
@@ -184,7 +178,6 @@ function checkIfMoveable(pawn , cell){
     pawn.setMoveability( {moveable : true , cell : cell });
 
 }
-
 
 //  Sposta la pedina
 
@@ -198,13 +191,12 @@ function movePawn(pawn , cell){
     console.log(`Devo Spostare la pedina ${pawn.index} dalla casella ${pawn.cell?.index} alla casella ${cell.index}`);
         
     //  Se sulla cella di destinazione è già presente una pedina avversaria
-    if(cell.pawn) {
-        
+    if(cell.pawn) {        
         //  In questo caso le pedine vanno scambiate. Se la casella è precendete alla 26 le pedine prendono semplicemente il posto l'una dell'altra
         //  Se invece la pendina viene raggiunta su una delle ultime 3 celle finirà sulla cella 26 (dalla quale in seguito sarà automaticamente trasferita alla 14)
         pownMovements.push({pawn : cell.pawn , cell : cell.index > 25? cells[26] : pawn.cell });
     }
-        
+
     pownMovements.forEach(mov => {  animatePawn(mov.pawn , mov.cell); }); // animazione pedina/e
     
     //  Le operazioni partiranno con un secondo di ritardo per consentire all'animazione CSS di concludersi
@@ -219,7 +211,11 @@ function movePawn(pawn , cell){
             pownMovements.forEach(mov => {  addPawn(mov.pawn , mov.cell); });
         }
 
+        //   A conclusione di tutto lancia nuovo round
+        newRound();
+
     }, 1000);
+
 
 }
 
@@ -332,7 +328,9 @@ function animatePawn(pawn , cell) {
     
     console.log(`la pedina deve spostarsi di ${xOffsetCells} caselle (del ${xOffsetPerc}%) in orizzontale e di ${yOffsetCells} caselle (del ${yOffsetPerc}%)  in verticale`);
     
-    pawn.el.style = `transition: all 1s; left: ${xOffsetPerc}%; top: ${yOffsetPerc}%; opacity: ${gameOver ? '0' : '1'};`;  // assegnazione finale dello style (solo spostamento o spostamento e scomparsa)
+    setTimeout(() => {        
+        pawn.el.style = `transition: all 1s; ${backward ? '' : 'z-index: 100;'} left: ${xOffsetPerc}%; top: ${yOffsetPerc}%; opacity: ${gameOver ? '0' : '1'};`;  // assegnazione finale dello style (solo spostamento o spostamento e scomparsa)
+    }, 20);
     
 }
 
@@ -343,124 +341,163 @@ function animatePawn(pawn , cell) {
 ***
 */
 
-flipSticks();
+
+// Riporta tutti i bastoncini alla posizione iniziale (mostrano lato bianco)
+
+function resetSticks(){
+    Array.from(document.querySelectorAll('.stick__single__side--black')).forEach(el => el.style.transform = `rotateY(-180deg)`);
+    Array.from(document.querySelectorAll('.stick__single__side--white')).forEach(el => el.style.transform = `rotateY(0deg)`);
+}
 
 
 //  Muove i 4 bastoncini per generare (casualmente) un punteggio
 
 function flipSticks() {
 
-    /*
-    riorganizza tutto come dio comanda (ovvero in funzioni...)
-    */
-    let points = [];
+    elSticks.removeEventListener('click' , flipSticks);
+    
+    let sticksPoints = [];
 
     for (let i = 0; i < 4; i++){
         
         const elBlack = document.querySelector(`.stick__single--${i} > .stick__single__side--black`);
         const elWhite = document.querySelector(`.stick__single--${i} > .stick__single__side--white`);
+                            
+        let n = getRandom(3,4); // numero casuale di rotazioni per ciascun bastoncino
+        
+        // numero di rotazioni dispari  === bastoncino nero   === 0 punti
+        // numero di rotazioni pari     === bastoncino bianco === 1 punto
 
-        function newFlip(){
-
-            elBlack.style.animation = `none`;
-            elWhite.style.animation = `none`;
-
+        let points = 1;
+        
+        if (n % 2 !== 0) {
             n--;
-
-            setTimeout(() => {  // 1000 + 10
-
-                elBlack.style.animation = `flip-sticks-black 1s forwards 1 linear`;
-                elWhite.style.animation = `flip-sticks-white 1s forwards 1 linear`;
-
-                setTimeout(() => {
-
-                    if(n)   newFlip();
-                    else    getSticksPoints(n % 2);
-
-                },1000 + 10);
-
-            },10);
-
+            points = 0;
         }
 
-        let n = getRandom(1,4);
+        let speed = 0.5;   // velocità per ogni animazione (in secondi)
 
-        newFlip();
+        const delay = i / 10 * 1000;    // ogni bastoncino inizierà l'animazione con un lieve ritardo (delay) rispetto a quello precedente
 
+        setTimeout(() => {  // delay
+                        
+            elBlack.style.animation = `flip-sticks-black ${speed}s forwards ${n} linear`;
+            elWhite.style.animation = `flip-sticks-white ${speed}s forwards ${n} linear`;
+            
+            // quando il bastoncino terminerà l'animazione
+            setTimeout(() => {  // 1000 * speed * n
+                
+                elBlack.style.animation = `none`;
+                elWhite.style.animation = `none`;
+                
+                setTimeout(() => {
+                    
+                    if(points === 0) {
+                        
+                        elWhite.style.transition = `all ${speed}s ease-out`;
+                        elBlack.style.transition = `all ${speed}s ease-out`;
+                        
+                        setTimeout(() => {
+                            
+                            elWhite.style.transform = `rotateY(180deg)`;
+                            elBlack.style.transform = `rotateY(0deg)`;
+                            
+                        }, 50);
+                        
+                    }
+
+                    setTimeout(() => {
+                        calculateScore(points);
+                    }, speed);
+                    
+                    
+                }, 10);
+                
+            },1000 * speed * n);                
+        }, delay);
     }
 
-    function getSticksPoints(point){
-        
-        points.push(point);
 
-        if(points.length ===  4){
-            console.log(`hai totalizzato ${points.reduce( (acc , point) => acc + point  , 0)} punti`);
+    //  Calcola il punteggio come somma dei risultati dei singoli bastoncini
+
+    function calculateScore(point){
+        
+        sticksPoints.push(point);
+
+        if(sticksPoints.length ===  4){
+            
+            currentScore = sticksPoints.reduce( (acc , point) => acc + point  , 0);
+
+            if (currentScore === 0) currentScore = 5;
+            
+            console.log(`Hai totalizzato ${currentScore} punti`);
+            checkScore(currentScore);
         }
     }    
-
-    newRound();
 }
- 
 
-//  Nuovo turno
+
+//  In base al punteggio ottenuto dall'ultimo lancio, stabilisce quali operazioni compiere
+
+function checkScore(score){
+    
+    showMessage(`È uscito ${score}${score !== 2 && score !== 3 ? '. Hai diritto ad un turno extra!' : '.'}`);
+    
+    //  Controlla quali pedine possono spostarsi in base al punteggio corrente
+    pawns.forEach( pawn =>  checkIfMoveable(pawn , cells[pawn.cell.index + score] || null) );    // se la casella di destinazione non esiste (> 29) passa null
+    
+    //  Se non ci sono mosse disponibili stampa errore e passa al turno successivo
+    if (!pawns.some( pawn => pawn.isMoveable)) {
+        showMessage(`Nessuna pedina può spostarsi di ${score} caselle. Si passa al turno successivo.`);
+        newRound();
+        return;
+    }
+}
+
+//  Prepara il turno successivo
 
 function newRound(){
 
-    //  Se è uscito un 2 o un 3 si cambia giocatore 
-    if(currentScore === 2 || currentScore === 3){
-        // questo if si trova qui momentaneamente
-        currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
-    }
+    resetSticks();
 
-    console.log(`È il turno di ${currentPlayer}`);
-
-    currentScore = getRandom(1 , 5);
-
-    console.log(`Tiro da ${currentScore} caselle`);
-    showMessage(`Tiro da ${currentScore} caselle`);
-
-    pawns.forEach( pawn =>  checkIfMoveable(pawn , cells[pawn.cell.index + currentScore] || null) );    // se la casella di destinazione non esiste (> 29) passa null
-
-    if (!pawns.some( pawn => pawn.isMoveable)) {
-        showMessage(`ATTENZIONE: NON CI SONO MOSSE DISPONIBILI!`);
-    };
-
+    // Se è uscito 2 o 3 si cambia giocatore
+    if(currentScore === 2 || currentScore === 3)  changePlayer();
+    
+    // riattiva bastoncini
+    elSticks.addEventListener('click' , flipSticks);
+      
+    showMessage(`È il turno di ${currentPlayer}. Ruota i bastoncini!`);
 }
 
-
+function changePlayer(){
+    currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+}
 
 
 //  Operazioni da compiere alla conclusione del gioco (quando un giocatore fa uscire tutte le sue pedine dalla scacchiera)
 
 function gameOver(winner){
-    alert(`Gioco finito. Vince ${winner}`);
+    showMessage(`Gioco finito. Ha vinto ${winner}!`);
 }
 
 
 //  Stampa messaggi di gioco
 
-function showMessage(error) {
+function showMessage(newMsg) {
+
+    const now = new Date();
+
+    let msg = document.createElement('p');
+    msg.textContent = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} - ${newMsg}`;
+    msg.classList.add('console__msg');
     
-    elConsoleBox.textContent = error;
-    
+    elConsoleBox.insertAdjacentElement('afterbegin' , msg);
+
     setTimeout( function(){
-        elConsoleBox.textContent = '';
-    } , 4000)
+        elConsoleBox.children[1]?.remove();
+    } , 15000);
+
 }
-
-
-/*
-//
-//
-//  Event Handlers
-//
-*/
-
-// Al ridimensionarsi della finestra ricalcola dimensioni delle celle
-
-
-elSticks.addEventListener('click' , flipSticks);
-elConsoleBox.addEventListener('click' , newRound);
 
 /*
 ***
