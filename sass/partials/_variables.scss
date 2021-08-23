@@ -1,8 +1,8 @@
 //  Text
 
-$font-size-default : 2.2rem;
+$font-size-default : 2rem;
 
-$font-family-primary: 'Papyrus', sans-serif;
+$font-family-primary: 'Special Elite', cursive;
 
 $letter-spacing-default : 1px;
 
@@ -13,7 +13,7 @@ $line-height-default : 1.35em;
 
 $color-primary : rgb(5, 16, 36);
 
-$color-text : rgb(184, 132, 20);
+$color-text : rgb(255, 145, 0);
 
 $white: rgb(240, 240, 240);
 $black: rgb(17, 17, 17);
@@ -39,3 +39,21 @@ $transition-duration-medium  :  1s;
 // Misc
 
 $border-radius-standard : .5rem;
+
+
+// Media Queries
+
+@mixin resp($breakpoint) {
+
+    @if $breakpoint == phone {
+        @media only screen and (max-width: 31.25em) , screen and (max-height: 31.25em) {    // 500px
+            @content
+        };
+    }
+
+    @if $breakpoint == tablet {
+        @media only screen and (max-width: 64em) {    // 1024px
+            @content
+        };
+    }
+}

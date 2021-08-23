@@ -1,32 +1,61 @@
 .console__outer ,
 .controls {
-    background-color: rgba($white , .2);
     flex-grow: 0;
     flex-shrink: 0;
+
+    // background-color: rgba($white , .2);
+
+    @include resp(phone) {
+        background-color: transparent;
+    }
 }
 
 .console {
 
     &__outer {
-        flex-basis: 60%;
+        flex: 0 0 60%;
+        height: 100%;
         position: relative;
+
+        background-image: url('../img/console-bg.png');
+        background-size: 100% 100%;
     }
     
     &__inner {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: $spacing-big;
+        left: $spacing-big;
+        right: $spacing-big;
+        bottom: $spacing-big;
         overflow: auto;
 
-        padding: $spacing-big;
+        // padding: $spacing-big;
+
+        @include resp(tablet) {
+            top: $spacing-standard;
+            left: $spacing-standard;
+            right: $spacing-standard;
+            bottom: $spacing-standard;
+        }
+
+        @include resp(phone) {
+            top: $spacing-small;
+            left: $spacing-small;
+            right: $spacing-small;
+            bottom: $spacing-small;
+        }
     }
 
     &__msg {
+
+        letter-spacing: 5px;
+        color: $black;
+        margin-bottom: $spacing-small;
+        
         
         &:first-child{
-            margin-bottom: $spacing-small;
+            text-shadow: 1px 1px lighten($color-text, 20%) ;
+            margin-bottom: $spacing-standard;
             font-weight: bold;
         }
         
@@ -34,15 +63,95 @@
     
 }
 
-.controls {
-    flex-basis: 30%;
-    padding: $spacing-big;
-
-}
-
 .stick {
 
+    $handle-width  : 5rem;
+    $handle-border : .6rem;
+
+    &__wrapper {
+        position: relative;
+        flex: 0 1 40%;
+
+        align-self: flex-end;
+
+        height: 100%;
+        max-height: 30rem;
+
+        padding: $spacing-standard $handle-width;
+
+    }
+
+    &__handle {
+        position: absolute;
+        width: $handle-width;        
+        height: 50%;
+        top: 50%;        
+
+        //  Manico
+
+        &::before {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: calc(100% - #{$handle-width} / 3);
+            border: $handle-border ridge $color-text;
+            border-bottom: none;
+            z-index: 10;
+        }
+
+        //  Piedistallo
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: $handle-width;
+            height: $handle-width / 2;
+            border-radius: 50%;
+            background-color: $color-text;
+            background-image: radial-gradient(transparent , rgba($black,.5));
+            z-index: 5;
+
+        }
+
+        &--left {
+
+            left: 0;
+            
+            &::before {
+                left: calc(50%);
+                border-right: none;
+                border-top-left-radius: 50%;
+            }
+        
+            &::after {
+                left: $handle-border / 2;
+            }
+
+        }
+
+        &--right {
+
+            right: 0;
+            
+            &::before {
+                right: calc(50%);
+                border-left: none;
+                border-top-right-radius: 50%;
+            }
+        
+            &::after {
+                right: $handle-border / 2;
+            }
+
+        }
+
+    }
+    
+
     &__container {
+
+        position: relative;
 
         height: 100%;
         width: 100%;
@@ -52,15 +161,19 @@
         flex-wrap: nowrap;
         justify-content: space-evenly;
 
+
         overflow: hidden;
 
-        border: 5px ridge gold;
+        border: $handle-border ridge $color-text;
 
         border-radius: 20%;
 
-        padding: $spacing-standard;
-        
+        padding: 2%;
+
+        background-image: linear-gradient( to bottom right , rgba($gray , .35) , rgba($gray , .15));
+        cursor: pointer;
     }
+
     
     &__single {
         height: 100%;
@@ -75,10 +188,11 @@
         
         &__side {
             position: absolute;
-            top: 0;
+            top: 5%;
             left: 0;
+            bottom: 5%;
             width: 100%;
-            height: 100%;
+            
             border-radius: 10%;
             
 
@@ -100,23 +214,27 @@
 
         }
 
-        &::after {
+        &::after ,
+        &::before {
             content: '';
-            position: absolute;
-
-            width: 4px;
-
-            background-color: gold;
+            
             display: block;
-
+            height: $spacing-standard;
+            
+            position: absolute;
             left: 50%;
-            top: 50%;
-
-            transform: translate(-50% , -50%);
-            height: 150%;
-
             z-index: -5;
+            transform: translate(-50%);
 
+            border-left: $handle-border ridge $color-text;
+        }
+
+        &::before {
+            top: -.5rem;
+        }
+
+        &::after {
+            bottom: -.5rem;
         }
 
     }

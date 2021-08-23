@@ -1,23 +1,31 @@
 
 .board {
+
+    &__wrapper {
+        
+        padding: 3%;
+        background-image: url('../img/wood-8bit.png');
+        background-size: 100% 100%;
+        background-position: center center;
+    }
+    
+    display: flex;
+    flex-wrap: wrap;    
+    flex-direction: row;
+    
+    margin: auto;
+    
+    overflow: hidden;
+    
+    border-radius: 5px;
+
     background-image: 
         url('../img/board-shadow.png'),
-        // linear-gradient(rgba($black , .3) ,rgba($black , .3)),
         url('../img/board-bg-1.jpg');
 
     background-size: 100% 100% , 100% 100%;
 
     outline: 2px inset rgba($black, .5);    // simula bordo
-
-
-    display: flex;
-    flex-wrap: wrap;    
-    flex-direction: row;
-
-    margin: auto;
-
-    border-radius: 5px;
-    overflow: hidden;
 }
 
 .cell {
@@ -28,7 +36,6 @@
 
     outline: 1px inset rgba($black, .5);    // simula bordo
 
-    // background-image: url('../img/cell-wood.png');
     background-size: 100% 100%;
 
 
@@ -39,19 +46,30 @@
         float: left;
     }
 
-
     &--black {
         background-color: rgba($black , .2);
     }
 
-    &--white {
-        // background-color: rgba(192, 192, 192 , .2);
+    // predisposizione immagini di sfondo per alcune celle
+
+    &::after {  
+        content: ''; 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100%;
+        height: 100%;        
+        background-size: 80% auto;
+        background-repeat: no-repeat;
+        background-position: center center;
     }
 
-    &--14::after{ content: '15'; color: orange; position: absolute; left: 0;}
-    &--25::after{ content: 'checkpoint'; color: blue; position: absolute; left: 0;}
-    &--26::after{ content: 'water'; color: red; position: absolute; left: 0;}
-    &--27::after{ content: '-3'; color: green; position: absolute; left: 0;}
-    &--28::after{ content: '-2'; color: green; position: absolute; left: 0;}
-    &--29::after{ content: '-1'; color: green; position: absolute; left: 0;}
+    //  Assegnazione immagini di sfondo ad alcune celle
+
+    &--14::after{ background-image: url('../img/bg-cell-14.png'); }
+    &--25::after{ background-image: url('../img/bg-cell-25.png'); }
+    &--26::after{ background-image: url('../img/bg-cell-26.png'); }
+    &--27::after{ background-image: url('../img/bg-cell-27.png'); }
+    &--28::after{ background-image: url('../img/bg-cell-28.png'); }
+    &--29::after{ background-image: url('../img/bg-cell-29.png'); }
 }

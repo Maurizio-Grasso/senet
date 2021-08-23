@@ -15,8 +15,8 @@
     
     &--black {
 
-        width: 40%;
-        height: 40%;
+        width: 35%;
+        height: 35%;
 
         background-image: 
         url('../img/shadow.png') ,
@@ -45,6 +45,7 @@
         animation-duration: $transition-duration-medium;
         animation-iteration-count: infinite;
         animation-timing-function: ease-in;
+        cursor: pointer;
     }
 }
 

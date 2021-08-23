@@ -45,28 +45,41 @@ body {
         align-content: stretch;
         align-items: stretch;
 
-        padding: $spacing-standard;    
+        padding: $spacing-standard $spacing-huge;
+
+        @include resp(tablet) {
+            padding: $spacing-standard;
+        }
+        
+        @include resp(phone) {
+            padding: $spacing-small;
+        }
+
+        background-image: url('../img/bg.jpg');
+        background-size: cover;
+
     }
 
     &__row {
 
         &--toolbar {
             flex: 1 1 auto;
-            margin-bottom: $spacing-standard;
-
+            
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            align-items: stretch;
+            align-items: center;
+            flex-wrap: nowrap;
         }
-
+        
         &--board {
             flex: 0 0 auto;
-            padding: $spacing-big;
-
-            background-image: url('../img/wood-8bit.png');
-            background-size: 100% 100%;
-            background-position: center center;
+            
+            margin-top: $spacing-standard;
+            
+            @include resp(phone) {
+                margin-top: $spacing-small;
+            }
 
         }
     }

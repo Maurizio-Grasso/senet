@@ -215,8 +215,7 @@ function movePawn(pawn , cell){
         newRound();
 
     }, 1000);
-
-
+    
 }
 
 

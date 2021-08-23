@@ -1,5 +1,13 @@
 :root {
     font-size: 62.5%;
+
+    @include resp(tablet) {
+        font-size: 50%;
+    }
+
+    @include resp(phone) {
+        font-size: 40%;
+    }
 }
 
 * ,
@@ -17,6 +25,4 @@ body {
     font-family: $font-family-primary;
     color: $color-text;
     letter-spacing: 3px;
-
-    background-image: linear-gradient(to bottom right, $black , $color-primary);
 }
