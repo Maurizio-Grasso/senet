@@ -35,42 +35,40 @@ function init(){
 //  Crea le 30 celle che compongono la scacchiera e restituisce un array che le contiene tutte
 
 function createCells() {
-    
-    //  Crea 30 div con classe 'cell'
-    
-    for(let i = 0; i < 30; i++){
-        elBoardBox.insertAdjacentHTML( 'beforeend' , `<div class="cell"></div>`);
-    }
 
-    //  Inserisco tutte le celle in un array 
-    const unsortedCells = [...document.querySelectorAll('.cell')];
+    // Per ogni cella esiste un oggetto e tutti gli oggetti saranno elementi di un array
 
-    // Ordino l'array correttamente (gli elementi nella riga centrale devono essere invertiti)
-    const sortedCells = [...unsortedCells.slice(0 , 10) , ...unsortedCells.slice(10 , 20).reverse() , ...unsortedCells.slice(20)];
-
-    //  Assegna numero e colore alle celle
-    sortedCells.forEach(function(cell , i) {
-        cell.classList.add(`cell--${i}` , `cell--${i % 2 === 0 ? 'black' : 'white'}`);
-    });
-    
     const cellObj = [];
-    
-    //  Crea oggetto rappresentate una cella e lo inserisce nel relativo array    
-    sortedCells.forEach( (cell , i) => { 
+
+    for(let i = 0; i < 30; i++) {
 
         cellObj.push({
             index : i , 
-            el : cell , 
-            pawn : null ,
-
+            // el    : null , 
+            // pawn  : null ,
             prev()  { return cells[this.index - 1 ] ?? null; } ,
             next()  { return cells[this.index + 1 ] ?? null; } ,            
             empty() { this.pawn = null; } ,
-
         });
+
+    }
+    
+    // Creazione di tutte le caselle nel DOM
+
+    cellObj.forEach( (cell , i) => {
+        
+        let el = document.createElement('div');
+        el.classList.add(`cell` , `cell--${i}` , `cell--${i % 2 === 0 ? 'black' : 'white'}`);
+        
+        cell.el = el;   // aggiunge elemento all'oggetto cella
+
+        if(i < 10 || i >= 20)   elBoardBox.appendChild(el);
+        // Nella fila centrale le caselle devono essere invertite
+        else    document.querySelector('.cell--9').insertAdjacentElement('afterend' , el);
+        
     });
 
-    cellObj.push({ index : 30});    // Cella finale invisibile: quando una pedina la raggiunge esce dal gioco.
+    cellObj.push({ index : 30});    // Casella finale invisibile: le pedine che la raggiungono escono dal gioco
     
     return(cellObj);
 
@@ -98,20 +96,20 @@ function createPawns(pawnsN = 7) {
             color       : color , 
             cell        : null ,
             isMoveable  : false ,
+            msg         : '' ,
 
-            setMoveability( {moveable = false, cell = null, message = 'Non puoi muovere questa pedina adesso'}) {
+            setMoveability( {moveable = false, msg = 'Non puoi muovere questa pedina adesso'}) {
 
                 this.isMoveable = moveable;
-
+                
                 if(moveable) {
-                    const thisPawn = this;
                     this.el.classList.add('pawn--moveable');
-                    this.el.onclick = function() { movePawn(thisPawn , cell) };
+                    this.msg = '';
                     return;
                 }
 
                 this.el.classList.remove('pawn--moveable');
-                this.el.onclick = function() { showMessage(message) };
+                this.msg = msg;
                 
             } ,
         }
@@ -124,20 +122,40 @@ function createPawns(pawnsN = 7) {
 
 /*
 //
-//  Funzioni allo spostamento
+//  Funzioni relative allo 
+//  spostamento
 //  delle pedine
 //
 */
+
+//  Al click sulla scacchiera...
+
+elBoardBox.addEventListener('click' , function(e) {
+
+    //  Se il click NON avviene su una pedina
+    if(!e.target.classList.contains('pawn')) return;
+    
+    //  Ricavo oggetto pedina corrispondente
+    const clickedPawn = pawns.find( pawn => pawn.el === e.target);
+
+    //  Se la pedina selezionata può muoversi
+    if(clickedPawn.isMoveable){
+        const targetCell = cells[clickedPawn.cell.index + currentScore]
+        selectPawn(clickedPawn , targetCell); // sposta pedina
+    } 
+    //  Se la pedina non può muoversi
+    else showMessage(clickedPawn.msg);       // mostra errore
+    
+});
 
 
 //  Controlla se una pedina può essere spostata in base alla sua posizione ed al lancio
 
 function checkIfMoveable(pawn , cell){
-    
-    
+        
     //  È il turno dell'avversario
     if(pawn.color !== currentPlayer){
-        pawn.setMoveability( {message : `Non puoi muovere questa pedina: è il turno di ${currentPlayer}.`});
+        pawn.setMoveability( {msg : `Non puoi muovere questa pedina: è il turno di ${currentPlayer}.`});
         return;
     }
 
@@ -146,12 +164,12 @@ function checkIfMoveable(pawn , cell){
 
         //  la pedina non si trova sulla casella 25, quindi non può superarla
         if(pawn.cell.index < 25){
-            pawn.setMoveability( {message : `Non puoi superare la casella 26 senza prima stazionarci.`});
+            pawn.setMoveability( {msg : `Non puoi superare la casella 26 senza prima stazionarci.`});
             return;
         }
 
         if( !cell || (pawn.cell.index > 25 && cell.index !== 30)) {
-            pawn.setMoveability( {message : `Per completare il gioco hai adesso bisogno di un tiro esatto da ${30 - pawn.cell.index}.`});
+            pawn.setMoveability( {msg : `Per completare il gioco hai adesso bisogno di un tiro esatto da ${30 - pawn.cell.index}.`});
             return;
         }
 
@@ -159,7 +177,7 @@ function checkIfMoveable(pawn , cell){
     
     //  La cella è già occupata da una pedina dello stesso colore. Non si procede
     if(cell.pawn?.color === pawn.color){
-        pawn.setMoveability( {message : `Non puoi spostare pedina in una casella già occupata da una pedina dello stesso colore.`});
+        pawn.setMoveability( {msg : `Non puoi spostare pedina in una casella già occupata da una pedina dello stesso colore.`});
         return;
     }
 
@@ -168,7 +186,7 @@ function checkIfMoveable(pawn , cell){
 
         //  Due (o più) pedine avversarie formano un muro che le rende inattaccabili (regola valida solo prima della casella 25)
         if(cell.index <= 25 && (cell.prev()?.pawn?.color === cell.pawn.color || cell.next()?.pawn?.color === cell.pawn.color)){            
-            pawn.setMoveability( {message : `Due o più pedine nella casella di destinazione formano un muro che le rende inattaccabili.`});
+            pawn.setMoveability( {msg : `Due o più pedine nella casella di destinazione formano un muro che le rende inattaccabili.`});
             return;
         }
     }
@@ -179,53 +197,53 @@ function checkIfMoveable(pawn , cell){
 
 }
 
-//  Sposta la pedina
+//  Operazioni preliminare da eseguire quando una pedina viene selezionata per lo spostamento
 
-function movePawn(pawn , cell){
+function selectPawn(pawn , cell){
 
-    //  rimuove mobilità da tutti i pawn (qui so già quale/i si muoverà/anno)
+    //  rimuove mobilità da tutti i pawn (qui sappiamo già quale/i si muoverà/anno)
     pawns.forEach( pawn => pawn.setMoveability( {moveable : false}) );
 
-    const pownMovements = [{pawn : pawn , cell : cell}];
+    console.log(`Bisogna spostare la pedina ${pawn.index} dalla casella ${pawn.cell?.index} alla casella ${cell.index}`);
 
-    console.log(`Devo Spostare la pedina ${pawn.index} dalla casella ${pawn.cell?.index} alla casella ${cell.index}`);
-        
-    //  Se sulla cella di destinazione è già presente una pedina avversaria
-    if(cell.pawn) {        
+    //  Le pedine da spostare possono essere 1 o 2 (in caso di scambio). Creo un oggetto 'spostamento' con proprietà pawn e cell e lo inserisco in un array. In seguito potrò eventualmente pushare un secondo oggetto.
+    const pawnsToMove = [ { pawn : pawn , cell : cell } ];
+
+    //  Se sulla cella di destinazione è già presente una pedina avversaria    
+    if(cell.pawn) {
+
         //  In questo caso le pedine vanno scambiate. Se la casella è precendete alla 26 le pedine prendono semplicemente il posto l'una dell'altra
         //  Se invece la pendina viene raggiunta su una delle ultime 3 celle finirà sulla cella 26 (dalla quale in seguito sarà automaticamente trasferita alla 14)
-        pownMovements.push({pawn : cell.pawn , cell : cell.index > 25? cells[26] : pawn.cell });
+        //  Pusho un secondo oggetto contenente queste informazioni nell'array degli spostamenti     
+        pawnsToMove.push( { pawn : cell.pawn , cell : cell.index > 25 ? cells[26] : pawn.cell } );
+        
     }
-
-    pownMovements.forEach(mov => {  animatePawn(mov.pawn , mov.cell); }); // animazione pedina/e
     
-    //  Le operazioni partiranno con un secondo di ritardo per consentire all'animazione CSS di concludersi
-    setTimeout(() => {
-                
-        //  Se la pedina deve uscire dal gioco
-        if(cell.index === 30 ) {          
-            pawnOut(pawn);
-        }   else {
-            pownMovements.forEach(mov => {  mov.pawn.el.style = ''; });
-            pownMovements.forEach(mov => {  removePawn(mov.pawn); });
-            pownMovements.forEach(mov => {  addPawn(mov.pawn , mov.cell); });
+    movePawns(pawnsToMove);
+   
+    newRound();
+    
+}
+    
+function movePawns(pawnsToMove){
+    
+    pawnsToMove.forEach( mov => animatePawn(mov.pawn , mov.cell) ); // animazione pedina/e
+    
+    //  Le operazioni partono con un secondo di ritardo per consentire all'animazione CSS di concludersi
+    setTimeout(() => {        
+        
+        pawnsToMove.forEach( mov => mov.pawn.el.style = '' );               // resetta stile
+    
+        if(pawnsToMove[0].cell.index === 30) pawnOut(pawnsToMove[0].pawn);  // la pedina esce dal gioco
+        
+        else {
+            pawnsToMove.forEach( mov => mov.pawn.cell.empty() );             // rimuove pedina/e da oggetto cella
+            pawnsToMove.forEach( mov => addPawn(mov.pawn , mov.cell) );     // ricrea pedina/e
         }
-
-        //   A conclusione di tutto lancia nuovo round
-        newRound();
-
+        
     }, 1000);
     
 }
-
-
-//  Rimuove Pedina da una cella
-
-function removePawn(pawn){    
-    pawn.cell.empty();
-    pawn.el.remove();        
-}
-
 
 //  Aggiunge Pedina ad una cella
 
@@ -233,6 +251,7 @@ function addPawn(pawn , cell){
     
     pawn.cell = cell;
     cell.pawn = pawn;
+
     cell.el.appendChild(pawn.el);
 
     //  Se la pedina finisce sulla cella 26 (acqua)
@@ -248,7 +267,8 @@ function pawnOut(pawn){
 
     let color = pawn.color;
 
-    removePawn(pawn);
+    pawn.el.remove();
+    pawn.cell.empty();
 
     pawns.splice(pawn.index , 1);                   // rimozione della pedina dall'array
     pawns.forEach((pawn , i) => pawn.index = i);    // Riassegna index a tutte le pedine (soluzione momentanea)
@@ -267,7 +287,7 @@ function pawnRebirth(pawn) {
 
     while(rebirtCell.pawn)  rebirtCell = rebirtCell.prev(); // se la casella è occupata la pedina dovrà essere spostata sulla prima casella libera precedente
 
-    movePawn(pawn , rebirtCell);
+    selectPawn(pawn , rebirtCell);  // !!! qui dovrebbe richiamare direttamente movePawns !!!
 
 }
 
@@ -494,7 +514,7 @@ function showMessage(newMsg) {
 
     setTimeout( function(){
         elConsoleBox.children[1]?.remove();
-    } , 15000);
+    } , 10000);
 
 }
 
