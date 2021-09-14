@@ -34,23 +34,29 @@ function init(){
 
 //  Crea le 30 celle che compongono la scacchiera e restituisce un array che le contiene tutte
 
+
 function createCells() {
 
     // Per ogni cella esiste un oggetto e tutti gli oggetti saranno elementi di un array
 
+    class Cell {
+        constructor(index){
+            this.index = index;
+        }
+
+        get prev() { return cells[this.index - 1 ] ?? null; }
+        get next() { return cells[this.index + 1 ] ?? null; }
+        
+        empty() { 
+            this.pawn = null;
+        }
+
+    }
+
     const cellObj = [];
 
     for(let i = 0; i < 30; i++) {
-
-        cellObj.push({
-            index : i , 
-            // el    : null , 
-            // pawn  : null ,
-            prev()  { return cells[this.index - 1 ] ?? null; } ,
-            next()  { return cells[this.index + 1 ] ?? null; } ,            
-            empty() { this.pawn = null; } ,
-        });
-
+        cellObj.push(new Cell(i));
     }
     
     // Creazione di tutte le caselle nel DOM
@@ -74,51 +80,49 @@ function createCells() {
 
 }
 
-
 //  Crea pedine all'inizio del gioco (pawnsN == numero di pedine per ogni giocatore)
 
 function createPawns(pawnsN = 7) {
 
-    for(let i = 0; i < pawnsN; i++) {
-        newSinglePawn('white' , i * 2);
-        newSinglePawn('black' , i * 2 + 1);
-    };
+    class Pawn {
+        constructor(color , index){
 
-    //  Creazione singola pedina
-    function newSinglePawn(color , index){
+            const el = document.createElement('div');
+            el.classList.add(`pawn` , `pawn--${color}` , `pawn--${index}`);            
 
-        const el = document.createElement('div');
-        el.classList.add(`pawn` , `pawn--${color}` , `pawn--${index}`);
+            this.index = index;
+            this.color = color;
+            this.el    = el;
 
-        let newPawn = {
-            index       : index ,
-            el          : el ,
-            color       : color , 
-            cell        : null ,
-            isMoveable  : false ,
-            msg         : '' ,
+            addPawn(this , cells[index]);
 
-            setMoveability( {moveable = false, msg = 'Non puoi muovere questa pedina adesso'}) {
-
-                this.isMoveable = moveable;
-                
-                if(moveable) {
-                    this.el.classList.add('pawn--moveable');
-                    this.msg = '';
-                    return;
-                }
-
-                this.el.classList.remove('pawn--moveable');
-                this.msg = msg;
-                
-            } ,
         }
 
-        pawns.push(newPawn);    // Aggiunge all'array
+        setMoveability( {moveable = false, msg = 'Non puoi muovere questa pedina adesso'} ) {
 
-        addPawn(newPawn , cells[index]);
+            this.isMoveable = moveable;
+            
+            if(moveable) {
+                this.el.classList.add('pawn--moveable');
+                this.msg = '';
+                return;
+            }
+
+            this.el.classList.remove('pawn--moveable');
+            this.msg = msg;
+            
+        }
     }
+
+    for(let i = 0; i < pawnsN; i++) {
+
+        pawns.push( new Pawn('white' , i * 2) );
+        pawns.push( new Pawn('black' , i * 2 + 1) );
+
+    };
+
 }
+
 
 /*
 //
@@ -127,6 +131,7 @@ function createPawns(pawnsN = 7) {
 //  delle pedine
 //
 */
+
 
 //  Al click sulla scacchiera...
 
@@ -185,7 +190,7 @@ function checkIfMoveable(pawn , cell){
     if(cell.pawn?.color) {
 
         //  Due (o più) pedine avversarie formano un muro che le rende inattaccabili (regola valida solo prima della casella 25)
-        if(cell.index <= 25 && (cell.prev()?.pawn?.color === cell.pawn.color || cell.next()?.pawn?.color === cell.pawn.color)){            
+        if(cell.index <= 25 && (cell.prevpawn?.color === cell.pawn.color || cell.next?.pawn?.color === cell.pawn.color)){            
             pawn.setMoveability( {msg : `Due o più pedine nella casella di destinazione formano un muro che le rende inattaccabili.`});
             return;
         }
@@ -285,7 +290,7 @@ function pawnRebirth(pawn) {
     
     let rebirtCell = cells[14]; // casa della rinascita di base
 
-    while(rebirtCell.pawn)  rebirtCell = rebirtCell.prev(); // se la casella è occupata la pedina dovrà essere spostata sulla prima casella libera precedente
+    while(rebirtCell.pawn)  rebirtCell = rebirtCell.prev; // se la casella è occupata la pedina dovrà essere spostata sulla prima casella libera precedente
 
     selectPawn(pawn , rebirtCell);  // !!! qui dovrebbe richiamare direttamente movePawns !!!
 
@@ -491,7 +496,6 @@ function newRound(){
 function changePlayer(){
     currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
 }
-
 
 //  Operazioni da compiere alla conclusione del gioco (quando un giocatore fa uscire tutte le sue pedine dalla scacchiera)
 
